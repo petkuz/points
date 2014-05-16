@@ -85,3 +85,31 @@ def onLine(*a):
 		if(collinearity(vector(a[0],a[i]),vector(a[0],a[l-1]))==False):return False
 	return True
 	
+def onPlane(*a):
+	"""function to check points lying on a one plane"""
+	l = len(a)
+	for i in range(0,l):
+		if(check(a[i],"point")==False):
+			print("Type error")
+			return  False
+	if(l<3):
+		print("Not enough points error!")
+		return False
+	if(l==3):
+		return True
+	x1 = a[0][0] 
+	y1 = a[0][1]
+	z1 = a[0][2]
+	p = a[1][0] - x1
+	b = a[1][1] - y1
+	c = a[1][2] - z1
+	d = a[2][0] - x1	
+	e = a[2][1] - y1
+	f = a[2][2] - z1
+	for i in range(2,l):
+		x = a[i][0]
+		y = a[i][1]
+		z = a[i][2]
+		if((x-x1)*(b*f-c*e)-(y-y1)*(p*f-c*d)+(z-z1)*(p*e-b*d)!=0):
+			return False
+	return True
