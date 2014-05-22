@@ -1,4 +1,10 @@
 import sys
+def logout(function):
+	def wrapper(a):
+		print(function(a))
+	return wrapper
+
+
 class Error(Exception):
 	"""class for handling exceptions"""
 	def __init__(self, ErrorType):
@@ -18,6 +24,8 @@ class Error(Exception):
 
 class Do:
 	"""class to work with geometry objects, such as point or vector"""
+	
+
 	def createFromCoords(self, x, y, z, t):
 		if(isinstance(x,int) and isinstance(y,int) and isinstance(z,int) and 
 			(t=='vector' or t=="point")):
@@ -48,7 +56,8 @@ class Do:
 				raise Error(1)
 				return False
 		return True
-
+		
+	@logout
 	def define(self):
 		"""function to define type of objects"""
 		return(self.type)
@@ -189,6 +198,7 @@ class PointCloud(Do):
 		else:
 			self.current += 1
 			return self.points[self.current-1]
+
 
 def help():
 	"""function to help"""
