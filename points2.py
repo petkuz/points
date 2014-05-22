@@ -27,8 +27,9 @@ class Do:
 	
 
 	def createFromCoords(self, x, y, z, t):
-		if(isinstance(x,int) and isinstance(y,int) and isinstance(z,int) and 
-			(t=='vector' or t=="point")):
+		if (False in map(lambda x: True if isinstance(x,int) else False,[x,y,z])):
+			raise Error(0)
+		if(t=='vector' or t=="point"):
 			self.x = x
 			self.y = y
 			self.z = z
