@@ -1,210 +1,229 @@
 import sys
+
+
 def logout(function):
-	def wrapper(a):
-		print(function(a))
-	return wrapper
+    def wrapper(a):
+        print(function(a))
+    return wrapper
 
 
 class Error(Exception):
-	"""class for handling exceptions"""
-	def __init__(self, ErrorType):
-		errorText = ["createFromCoords(wrong type).", 
-					"checkType(wrong type)", 
-					"checkType(not enough arguments)",
-					"onLine(no arguments)",
-					"onPlane(no arguments)",
-					"PointCloud(no arguments)",
-					"checkType(argument hasn't got attibute 'type')"]
-		self.value = "Undefined error!"
-		for i in range(0,len(errorText)):
-			if(ErrorType==i): 
-				self.value = "Error: "+errorText[i]
-				break
+
+    """class for handling exceptions"""
+
+    def __init__(self, ErrorType):
+        errorText = ["createFromCoords(wrong type).",
+                     "checkType(wrong type)",
+                     "checkType(not enough arguments)",
+                     "onLine(no arguments)",
+                     "onPlane(no arguments)",
+                     "PointCloud(no arguments)",
+                     "checkType(argument hasn't got attibute 'type')"]
+        self.value = "Undefined error!"
+        for i in range(0, len(errorText)):
+            if(ErrorType == i):
+                self.value = "Error: " + errorText[i]
+                break
 
 
 class Do:
-	"""class to work with geometry objects, such as point or vector"""
-	
 
-	def createFromCoords(self, x, y, z, t):
-		if (False in map(lambda x: True if isinstance(x,int) else False,[x,y,z])):
-			raise Error(0)
-		if(t=='vector' or t=="point"):
-			self.x = x
-			self.y = y
-			self.z = z
-			self.type = t
-		else: raise Error(0)
+    """class to work with geometry objects, such as point or vector"""
 
-	def createPointCloud(self, points):
-		if(self.checkType(self,"pointCloud")):
-			j = 0
-			for i in self:				
-				self.points[j] = points[j]
-				j+=1
+    def createFromCoords(self, x, y, z, t):
+        if (False in map(lambda x: True if isinstance(x, int) else False, [x, y, z])):
+            raise Error(0)  # raise my own exeption#raise my own exeption
+        if(t == 'vector' or t == "point"):
+            self.x = x
+            self.y = y
+            self.z = z
+            self.type = t
+        else:
+            raise Error(0)  # raise my own exeption
 
-	def checkType(*a):
-		l = len(a)
-		if(l<3):
-			raise Error(2)
-			return False
-		for i in range(1, l-1):
-			if hasattr(a[i],'type'):
-				if(a[i].type!=a[l-1]): 
-					raise Error(6)
-					return False
-			else:
-				raise Error(1)
-				return False
-		return True
-		
-	@logout
-	def define(self):
-		"""function to define type of objects"""
-		return(self.type)
+    def createPointCloud(self, points):
+        """function to create pointCloud from points"""
+        if(self.checkType(self, "pointCloud")):  # checking type of given obj
+            j = 0
+            # usage of iterable type
+            for i in self:
+                self.points[j] = points[j]
+                j += 1
 
-	def write(self):
-		"""function to print objects"""
-		if(self.type=="point"):
-			print("Object type: Point, with coordinates: ("+str(self.x)+","+str(self.y)+","+str(self.z)+")")
-		elif(self.type=="vector"):
-			print("Object type: Vector, with coordinates: {"+str(self.x)+","+str(self.y)+","+str(self.z)+"}")
-		elif(self.type=="pointCloud"):
-			points = ""
-			for j in range(0,len(self.points)):
-				points += " ("+str(self.points[j].x)+","+str(self.points[j].y)+","+str(self.points[j].z)+"),"
-			points = points[:-1]
-			print("Object type: PointCloud, with points: "+points)
+    def checkType(*a):
+        l = len(a)
+        if(l < 3):
+            raise Error(2)  # raise my own exeption
+            return False
+        for i in range(1, l - 1):
+            if hasattr(a[i], 'type'):
+                if(a[i].type != a[l - 1]):
+                    raise Error(6)  # raise my own exeption
+                    return False
+            else:
+                raise Error(1)  # raise my own exeption
+                return False
+        return True
+
+    @logout
+    def define(self):
+        """function to define type of objects"""
+        return(self.type)
+
+    def write(self):
+        """function to print objects"""
+        if(self.type == "point"):
+            print("Object type: Point, with coordinates: (" +
+                  str(self.x) + "," + str(self.y) + "," + str(self.z) + ")")
+        elif(self.type == "vector"):
+            print(
+                "Object type: Vector, with coordinates: {" + str(self.x) + "," + str(self.y) + "," + str(self.z) + "}")
+        elif(self.type == "pointCloud"):
+            points = ""
+            for j in range(0, len(self.points)):
+                points += " (" + str(self.points[j].x) + "," + str(
+                    self.points[j].y) + "," + str(self.points[j].z) + "),"
+            points = points[:-1]
+            print("Object type: PointCloud, with points: " + points)
 
 
 class Point(Do):
-	"""class to creating and working with points"""
-	def __init__(self, x=0, y=0, z=0):
-		try:
-			super().createFromCoords(x, y, z, "point")
-		except Error as e:
-			print(e.value)	
-			sys.exit()
 
-	def onLine(*a):
-		"""function to check points lying on a one line"""
-		try:
-			l = len(a)
-			if(l==1):
-				raise Error(3)
-				return False
-			for i in range(1,l):
-				Do.checkType(a[0], a[i], "point")
-			if(l==2):
-				return True
-			for i in range(2,l-1):
-				A = Vector()
-				A.fromPoints(a[1], a[i])
-				B = Vector()
-				B.fromPoints(a[1], a[l-1])
-				if(A.collinearity(B)==False):return False
-			return True
-		except Error as e:
-			print(e.value)	
-			sys.exit()		
+    """class to creating and working with points"""
 
-	def onPlane(*a):
-		"""function to check points lying on a one plane"""
-		try:
-			l = len(a)
-			if(l==1):
-				raise Error(4)
-				return False
-			for i in range(1,l):
-				Do.checkType(a[0], a[i], "point")
-			if(l<=3):
-				return True
-			x1 = a[0].x 
-			y1 = a[0].y
-			z1 = a[0].z
-			p = a[1].x - x1
-			b = a[1].y - y1
-			c = a[1].z- z1
-			d = a[2].x  - x1	
-			e = a[2].y - y1
-			f = a[2].z - z1
-			for i in range(3,l):
-				x = a[i].x
-				y = a[i].y
-				z = a[i].z
-				if((x-x1)*(b*f-c*e)-(y-y1)*(p*f-c*d)+(z-z1)*(p*e-b*d)!=0):
-					return False
-			return True
-		except Error as e:
-			print(e.value)	
-			sys.exit()
-		
+    def __init__(self, x=0, y=0, z=0):
+        try:
+            super().createFromCoords(x, y, z, "point")
+        except Error as e:
+            print(e.value)
+            sys.exit()
+
+    def onLine(*a):
+        """function to check points lying on a one line"""
+        try:
+            l = len(a)
+            if(l == 1):
+                raise Error(3)  # raise my own exeption
+                return False
+            for i in range(1, l):
+                Do.checkType(a[0], a[i], "point")  # checking type of given obj
+            if(l == 2):
+                return True
+            for i in range(2, l - 1):
+                A = Vector()
+                A.fromPoints(a[1], a[i])
+                B = Vector()
+                B.fromPoints(a[1], a[l - 1])
+                if(A.collinearity(B) == False):
+                    return False
+            return True
+        except Error as e:
+            print(e.value)
+            sys.exit()
+
+    def onPlane(*a):
+        """function to check points lying on a one plane"""
+        try:
+            l = len(a)
+            if(l == 1):
+                raise Error(4)  # raise my own exeption
+                return False
+            for i in range(1, l):
+                Do.checkType(a[0], a[i], "point")  # checking type of given obj
+            if(l <= 3):
+                return True
+            x1 = a[0].x
+            y1 = a[0].y
+            z1 = a[0].z
+            p = a[1].x - x1
+            b = a[1].y - y1
+            c = a[1].z - z1
+            d = a[2].x - x1
+            e = a[2].y - y1
+            f = a[2].z - z1
+            for i in range(3, l):
+                x = a[i].x
+                y = a[i].y
+                z = a[i].z
+                if((x - x1) * (b * f - c * e) - (y - y1) * (p * f - c * d) + (z - z1) * (p * e - b * d) != 0):
+                    return False
+            return True
+        except Error as e:
+            print(e.value)
+            sys.exit()
+
 
 class Vector(Do):
-	"""class to create and work with vectors"""
-	def __init__(self, x=0, y=0, z=0):
-		try:
-			super().createFromCoords(x, y, z, "vector")
-		except Error as e:
-			print(e.value)
-			sys.exit()
-		
 
-	def fromPoints(self, a, b):
-		"""function to creat vectors from points"""
-		try:
-			super().checkType(a, b, "point")
-			super().createFromCoords(b.x-a.x, b.y-a.y, b.z-a.z, self.type)
-		except Error as e:
-			print(e.value)
-			sys.exit()
+    """class to create and work with vectors"""
 
-	def collinearity(self, b):
-		"""function to check vectors collinearity"""
-		try:
-			super().checkType(b, "vector")
-			k1=self.x/b.x
-			k2=self.y/b.y
-			k3=self.z/b.z
-			if(k1==k2 and k1==k3):return True
-			return False
-		except Error as e:
-			print(e.value)
-			sys.exit()
+    def __init__(self, x=0, y=0, z=0):
+        try:
+            super().createFromCoords(x, y, z, "vector")
+        except Error as e:
+            print(e.value)
+            sys.exit()
+
+    def fromPoints(self, a, b):
+        """function to creat vectors from points"""
+        try:
+            super().checkType(a, b, "point")  # checking type of given obj
+            super().createFromCoords(
+                b.x - a.x, b.y - a.y, b.z - a.z, self.type)
+        except Error as e:
+            print(e.value)
+            sys.exit()
+
+    def collinearity(self, b):
+        """function to check vectors collinearity"""
+        try:
+            super().checkType(b, "vector")  # checking type of given obj
+            k = [x / y for x, y in zip(
+                [self.x, self.y, self.z], [b.x, b.y, b.z])]
+            if(k[0] == k[1] and k[0] == k[2]):
+                return True
+            return False
+        except Error as e:
+            print(e.value)
+            sys.exit()
 
 
 class PointCloud(Do):
-	"""class to work with point clouds"""
-	def __init__(self, *arg):
-		try:
-			l = len(arg)
-			if(l==0):raise Error(5)
-			for i in range(0,l):
-				super().checkType(arg[i], "point")
-			self.points = [0]*l
-			self.current = 0
-			self.max = l-1
-			self.type = "pointCloud"
-			super().createPointCloud(arg)
-		except Error as e:
-			print(e.value)
-			sys.exit()
 
-	def __iter__(self):
-		return self
+    """class to work with point clouds"""
 
-	def __next__(self):
-		if(self.current > self.max):
-			raise StopIteration
-		else:
-			self.current += 1
-			return self.points[self.current-1]
+    def __init__(self, *arg):
+        try:
+            l = len(arg)
+            if(l == 0):
+                raise Error(5)  # raise my own exeption
+            for i in range(0, l):
+                # checking type of given obj
+                super().checkType(arg[i], "point")
+            self.points = [0] * l
+            self.current = 0
+            self.max = l - 1
+            self.type = "pointCloud"
+            super().createPointCloud(arg)
+        except Error as e:
+            print(e.value)
+            sys.exit()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if(self.current > self.max):
+            raise StopIteration
+        else:
+            self.current += 1
+            return self.points[self.current - 1]
 
 
 def help():
-	"""function to help"""
-	print(
-	"""
+    """function to help"""
+    print(
+        """
 	-------------------------HELP GUIDE-----------------------
 	About: This is the module to work with points and vectors.
 	How to connect: To connect this module to your program you 
